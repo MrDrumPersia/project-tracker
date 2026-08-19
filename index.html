@@ -35,9 +35,6 @@
   .tabs button { flex:1; padding:11px 4px; border:none; border-radius:10px; background:#e8eaed; cursor:pointer; font-size:13px; color:#444; }
   .tabs button.active { background:#2563eb; color:#fff; font-weight:bold; }
 
-  .filters { display:flex; gap:8px; margin-bottom:12px; }
-  .filters > select { flex:1; margin-bottom:0; }
-
   .export-bar { margin-bottom:14px; }
   .export-bar button {
     width:100%; padding:11px 4px; border:1px solid #2563eb; background:#fff; color:#2563eb;
@@ -76,7 +73,7 @@
   .note-box textarea { background:transparent; border:none; margin-bottom:0; color:#6b5a1f; }
 
   .empty { text-align:center; color:#999; padding:30px 10px; font-size:14px; }
-  .status { text-align:center; font-size:12px; color:#999; margin-top:10px; }
+  .status { text-align:center; font-size:12px; color:#999; margin-top:10px; min-height:18px; }
 
   .modal-bg { display:none; position:fixed; top:0; right:0; left:0; bottom:0; background:rgba(0,0,0,0.45); z-index:50; align-items:center; justify-content:center; padding:20px; }
   .modal-bg.open { display:flex; }
@@ -89,6 +86,7 @@
   .btn-close { background:#e8eaed; color:#333; }
 </style>
 </head>
+
 <body>
 <div class="wrap">
 
@@ -111,6 +109,7 @@
         </div>
       </div>
     </div>
+
     <div class="row2">
       <div>
         <label>تاریخ اتمام (شمسی)</label>
@@ -152,184 +151,782 @@
 
 <script>
 /* ===== تبدیل تاریخ میلادی <-> شمسی ===== */
+
 function gregorianToJalali(gy, gm, gd) {
   var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
   var jy = (gy<=1600)?0:979;
   gy -= (gy<=1600)?621:1600;
   var gy2 = (gm>2)?(gy+1):gy;
-  var days = (365*gy) +(parseInt((gy2+3)/4))-(parseInt((gy2+99)/100))+(parseInt((gy2+399)/400))-80+gd+g_d_m[gm-1];
-  jy += 33*parseInt(days/12053); days %= 12053;
-  jy += 4*parseInt(days/1461); days %= 1461;
-  if (days > 365) { jy += parseInt((days-1)/365); days = (days-1)%365; }
-  var jm = (days < 186) ? 1+parseInt(days/31) : 7+parseInt((days-186)/30);
-  var jd = 1 + ((days < 186) ? (days%31) : ((days-186)%30));
+  var days = (365*gy)
+    +(parseInt((gy2+3)/4))
+    -(parseInt((gy2+99)/100))
+    +(parseInt((gy2+399)/400))
+    -80+gd+g_d_m[gm-1];
+
+  jy += 33*parseInt(days/12053);
+  days %= 12053;
+
+  jy += 4*parseInt(days/1461);
+  days %= 1461;
+
+  if (days > 365) {
+    jy += parseInt((days-1)/365);
+    days = (days-1)%365;
+  }
+
+  var jm = (days < 186)
+    ? 1+parseInt(days/31)
+    : 7+parseInt((days-186)/30);
+
+  var jd = 1 + (
+    (days < 186)
+      ? (days%31)
+      : ((days-186)%30)
+  );
+
   return [jy, jm, jd];
 }
+
 function jalaliToGregorian(jy, jm, jd) {
   var gy = (jy<=979)?621:1600;
+
   jy -= (jy<=979)?0:979;
-  var days = (365*jy) + (parseInt(jy/33)*8) + parseInt(((jy%33)+3)/4) + 78 + jd + ((jm<7)?(jm-1)*31:((jm-7)*30)+186);
-  gy += 400*parseInt(days/146097); days %= 146097;
-  if (days > 36524) { gy += 100*parseInt(--days/36524); days %= 36524; if (days >= 365) days++; }
-  gy += 4*parseInt(days/1461); days %= 1461;
-  if (days > 365) { gy += parseInt((days-1)/365); days = (days-1)%365; }
+
+  var days =
+    (365*jy)
+    + (parseInt(jy/33)*8)
+    + parseInt(((jy%33)+3)/4)
+    + 78
+    + jd
+    + ((jm<7)
+      ? (jm-1)*31
+      : ((jm-7)*30)+186);
+
+  gy += 400*parseInt(days/146097);
+  days %= 146097;
+
+  if (days > 36524) {
+    gy += 100*parseInt(--days/36524);
+    days %= 36524;
+
+    if (days >= 365) days++;
+  }
+
+  gy += 4*parseInt(days/1461);
+  days %= 1461;
+
+  if (days > 365) {
+    gy += parseInt((days-1)/365);
+    days = (days-1)%365;
+  }
+
   var gd = days + 1;
-  var sal_a = [0,31,((gy%4===0&&gy%100!==0)||(gy%400===0))?29:28,31,30,31,30,31,31,30,31,30,31];
+
+  var sal_a = [
+    0,31,
+    ((gy%4===0&&gy%100!==0)||(gy%400===0))?29:28,
+    31,30,31,30,31,31,30,31,30,31
+  ];
+
   var gm;
-  for (gm=1; gm<13; gm++) { var v = sal_a[gm]; if (gd <= v) break; gd -= v; }
+
+  for (gm=1; gm<13; gm++) {
+    var v = sal_a[gm];
+
+    if (gd <= v) break;
+
+    gd -= v;
+  }
+
   return [gy, gm, gd];
 }
-const jMonthNames = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-const faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-function toFaDigits(n) { return String(n).replace(/[0-9]/g, d => faDigits[d]); }
-function todayJalali() { const now = new Date(); return gregorianToJalali(now.getFullYear(), now.getMonth()+1, now.getDate()); }
-function isoFromJalali(jy, jm, jd) { const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd); return `${gy.toString().padStart(4,'0')}-${gm.toString().padStart(2,'0')}-${gd.toString().padStart(2,'0')}`; }
-function jalaliFromIso(iso) { const [gy, gm, gd] = iso.split('-').map(Number); return gregorianToJalali(gy, gm, gd); }
-function formatJalali(iso) { if(!iso) return '—'; const [jy, jm, jd] = jalaliFromIso(iso); return `${toFaDigits(jd)} ${jMonthNames[jm-1]} ${toFaDigits(jy)}`; }
+
+const jMonthNames = [
+  'فروردین','اردیبهشت','خرداد','تیر',
+  'مرداد','شهریور','مهر','آبان',
+  'آذر','دی','بهمن','اسفند'
+];
+
+const faDigits = [
+  '۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'
+];
+
+function toFaDigits(n) {
+  return String(n).replace(/[0-9]/g, d => faDigits[d]);
+}
+
+function todayJalali() {
+  const now = new Date();
+
+  return gregorianToJalali(
+    now.getFullYear(),
+    now.getMonth()+1,
+    now.getDate()
+  );
+}
+
+function isoFromJalali(jy, jm, jd) {
+  const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd);
+
+  return `${gy.toString().padStart(4,'0')}-${gm.toString().padStart(2,'0')}-${gd.toString().padStart(2,'0')}`;
+}
+
+function jalaliFromIso(iso) {
+  const [gy, gm, gd] = iso.split('-').map(Number);
+
+  return gregorianToJalali(gy, gm, gd);
+}
+
+function formatJalali(iso) {
+  if(!iso) return '—';
+
+  const [jy, jm, jd] = jalaliFromIso(iso);
+
+  return `${toFaDigits(jd)} ${jMonthNames[jm-1]} ${toFaDigits(jy)}`;
+}
 
 function fillDateSelect(yearSel, monthSel, daySel, jy, jm, jd) {
-  yearSel.innerHTML = ''; for (let y=jy-1; y<=jy+2; y++) yearSel.innerHTML += `<option value="${y}" ${y===jy?'selected':''}>${toFaDigits(y)}</option>`;
-  monthSel.innerHTML = ''; jMonthNames.forEach((name, idx) => monthSel.innerHTML += `<option value="${idx+1}" ${idx+1===jm?'selected':''}>${name}</option>`);
-  daySel.innerHTML = ''; for (let d=1; d<=31; d++) daySel.innerHTML += `<option value="${d}" ${d===jd?'selected':''}>${toFaDigits(d)}</option>`;
+
+  yearSel.innerHTML = '';
+
+  for (let y=jy-1; y<=jy+2; y++) {
+    yearSel.innerHTML +=
+      `<option value="${y}" ${y===jy?'selected':''}>${toFaDigits(y)}</option>`;
+  }
+
+  monthSel.innerHTML = '';
+
+  jMonthNames.forEach((name, idx) => {
+    monthSel.innerHTML +=
+      `<option value="${idx+1}" ${idx+1===jm?'selected':''}>${name}</option>`;
+  });
+
+  daySel.innerHTML = '';
+
+  for (let d=1; d<=31; d++) {
+    daySel.innerHTML +=
+      `<option value="${d}" ${d===jd?'selected':''}>${toFaDigits(d)}</option>`;
+  }
 }
+
 function setupDateSelects() {
+
   const [ty, tm, td] = todayJalali();
-  fillDateSelect(document.getElementById('sYear'), document.getElementById('sMonth'), document.getElementById('sDay'), ty, tm, td);
-  fillDateSelect(document.getElementById('eYear'), document.getElementById('eMonth'), document.getElementById('eDay'), ty, tm, td);
+
+  fillDateSelect(
+    document.getElementById('sYear'),
+    document.getElementById('sMonth'),
+    document.getElementById('sDay'),
+    ty, tm, td
+  );
+
+  fillDateSelect(
+    document.getElementById('eYear'),
+    document.getElementById('eMonth'),
+    document.getElementById('eDay'),
+    ty, tm, td
+  );
 }
+
 function getIso(prefix) {
-  const jd = parseInt(document.getElementById(prefix+'Day').value);
-  const jm = parseInt(document.getElementById(prefix+'Month').value);
-  const jy = parseInt(document.getElementById(prefix+'Year').value);
+
+  const jd = parseInt(
+    document.getElementById(prefix+'Day').value
+  );
+
+  const jm = parseInt(
+    document.getElementById(prefix+'Month').value
+  );
+
+  const jy = parseInt(
+    document.getElementById(prefix+'Year').value
+  );
+
   return isoFromJalali(jy, jm, jd);
 }
 
-/* ===== منطق برنامه ===== */
+
+/* =====================================================
+   ذخیره‌سازی از طریق API
+   ===================================================== */
+
 let projects = [];
 let currentTab = 'pending';
-const STORAGE_KEY = 'projects-tracker-v4';
-setupDateSelects();
+
+const API_URL = '/api/projects';
+
+
+/* ===== دریافت پروژه‌ها ===== */
 
 async function loadProjects() {
+
+  setStatus('در حال دریافت اطلاعات...');
+
   try {
-    const res = await window.storage.get(STORAGE_KEY, true);
-    projects = res ? JSON.parse(res.value) : [];
-  } catch (e) { projects = []; }
-  render();
-}
-async function saveProjects() {
-  try { await window.storage.set(STORAGE_KEY, JSON.stringify(projects), true); setStatus('ذخیره شد'); }
-  catch (e) { setStatus('خطا در ذخیره‌سازی'); }
-}
-function setStatus(msg) {
-  document.getElementById('statusLine').textContent = msg;
-  setTimeout(()=>{ document.getElementById('statusLine').textContent=''; }, 1200);
+
+    const response = await fetch(API_URL, {
+      method: 'GET',
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      throw new Error('خطا در دریافت اطلاعات');
+    }
+
+    const data = await response.json();
+
+    projects = Array.isArray(data) ? data : [];
+
+    render();
+
+    setStatus('اطلاعات دریافت شد');
+
+  } catch (error) {
+
+    console.error(error);
+
+    projects = [];
+
+    render();
+
+    setStatus('خطا در دریافت اطلاعات');
+  }
 }
 
-function addProject() {
-  const name = document.getElementById('projName').value.trim();
-  if (!name) { alert('نام شرکت یا پروژه را وارد کنید'); return; }
-  projects.unshift({ id: Date.now().toString(), name, start: getIso('s'), end: getIso('e'), progress: 0, tasks: [], note: '' });
+
+/* ===== ذخیره پروژه‌ها ===== */
+
+async function saveProjects() {
+
+  setStatus('در حال ذخیره...');
+
+  try {
+
+    const response = await fetch(API_URL, {
+
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify(projects)
+    });
+
+    if (!response.ok) {
+
+      let errorText = 'خطا در ذخیره‌سازی';
+
+      try {
+        const errorData = await response.json();
+
+        if (errorData.error) {
+          errorText = errorData.error;
+        }
+
+      } catch (_) {}
+
+      throw new Error(errorText);
+    }
+
+    setStatus('ذخیره شد');
+
+  } catch (error) {
+
+    console.error(error);
+
+    setStatus('خطا در ذخیره‌سازی');
+    alert('ذخیره‌سازی انجام نشد:\n' + error.message);
+  }
+}
+
+
+function setStatus(msg) {
+
+  document.getElementById('statusLine').textContent = msg;
+
+  setTimeout(() => {
+    document.getElementById('statusLine').textContent = '';
+  }, 2000);
+}
+
+
+/* ===== افزودن پروژه ===== */
+
+async function addProject() {
+
+  const name =
+    document.getElementById('projName').value.trim();
+
+  if (!name) {
+    alert('نام شرکت یا پروژه را وارد کنید');
+    return;
+  }
+
+  projects.unshift({
+
+    id: Date.now().toString(),
+
+    name,
+
+    start: getIso('s'),
+
+    end: getIso('e'),
+
+    progress: 0,
+
+    tasks: [],
+
+    note: ''
+  });
+
   document.getElementById('projName').value = '';
+
   setupDateSelects();
-  saveProjects();
+
   render();
+
+  await saveProjects();
 }
-function deleteProject(id) { if (!confirm('این پروژه حذف شود؟')) return; projects = projects.filter(p => p.id !== id); saveProjects(); render(); }
-function updateProgress(id, val) { const p = projects.find(x => x.id === id); if (p) { p.progress = parseInt(val); render(); saveProjects(); } }
-function addSubtask(id) {
-  const input = document.getElementById('sub-'+id);
-  const text = input.value.trim();
+
+
+/* ===== حذف پروژه ===== */
+
+async function deleteProject(id) {
+
+  if (!confirm('این پروژه حذف شود؟')) {
+    return;
+  }
+
+  projects =
+    projects.filter(p => p.id !== id);
+
+  render();
+
+  await saveProjects();
+}
+
+
+/* ===== تغییر درصد پیشرفت ===== */
+
+async function updateProgress(id, val) {
+
+  const p =
+    projects.find(x => x.id === id);
+
+  if (!p) return;
+
+  p.progress = parseInt(val);
+
+  render();
+
+  await saveProjects();
+}
+
+
+/* ===== افزودن کار ===== */
+
+async function addSubtask(id) {
+
+  const input =
+    document.getElementById('sub-'+id);
+
+  const text =
+    input.value.trim();
+
   if (!text) return;
-  projects.find(x => x.id === id).tasks.push({ text, done: false });
-  render(); saveProjects();
+
+  const project =
+    projects.find(x => x.id === id);
+
+  if (!project) return;
+
+  if (!Array.isArray(project.tasks)) {
+    project.tasks = [];
+  }
+
+  project.tasks.push({
+    text,
+    done: false
+  });
+
+  render();
+
+  await saveProjects();
 }
-function toggleSubtask(id, idx) { projects.find(x => x.id === id).tasks[idx].done ^= true; render(); saveProjects(); }
-function deleteSubtask(id, idx) { projects.find(x => x.id === id).tasks.splice(idx,1); render(); saveProjects(); }
-function updateNote(id, val) { projects.find(x => x.id === id).note = val; saveProjects(); }
-function escapeHtml(str) { return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+
+/* ===== انجام شدن کار ===== */
+
+async function toggleSubtask(id, idx) {
+
+  const project =
+    projects.find(x => x.id === id);
+
+  if (!project || !project.tasks[idx]) {
+    return;
+  }
+
+  project.tasks[idx].done =
+    !project.tasks[idx].done;
+
+  render();
+
+  await saveProjects();
+}
+
+
+/* ===== حذف کار ===== */
+
+async function deleteSubtask(id, idx) {
+
+  const project =
+    projects.find(x => x.id === id);
+
+  if (!project) return;
+
+  project.tasks.splice(idx, 1);
+
+  render();
+
+  await saveProjects();
+}
+
+
+/* ===== یادداشت ===== */
+
+async function updateNote(id, val) {
+
+  const project =
+    projects.find(x => x.id === id);
+
+  if (!project) return;
+
+  project.note = val;
+
+  await saveProjects();
+}
+
+
+/* ===== جلوگیری از HTML Injection ===== */
+
+function escapeHtml(str) {
+
+  return String(str).replace(
+    /[&<>"']/g,
+    m => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[m])
+  );
+}
+
+
+/* ===== تب‌ها ===== */
 
 function setTab(tab) {
+
   currentTab = tab;
-  ['pending','done','all'].forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===tab));
+
+  ['pending','done','all'].forEach(t => {
+
+    document
+      .getElementById('tab-'+t)
+      .classList.toggle(
+        'active',
+        t === tab
+      );
+  });
+
   render();
 }
+
+
+/* ===== فیلتر ===== */
+
 function getFilteredList() {
+
   let list = projects.slice();
-  if (currentTab === 'pending') list = list.filter(p => p.progress < 100);
-  else if (currentTab === 'done') list = list.filter(p => p.progress >= 100);
+
+  if (currentTab === 'pending') {
+
+    list =
+      list.filter(
+        p => Number(p.progress) < 100
+      );
+
+  } else if (currentTab === 'done') {
+
+    list =
+      list.filter(
+        p => Number(p.progress) >= 100
+      );
+  }
+
   return list;
 }
 
+
+/* ===== نمایش پروژه‌ها ===== */
+
 function render() {
-  const container = document.getElementById('projList');
-  const list = getFilteredList();
-  if (list.length === 0) { container.innerHTML = '<div class="empty">کاری برای نمایش نیست</div>'; return; }
 
-  container.innerHTML = list.map(p => {
-    const doneCount = p.tasks.filter(t=>t.done).length;
-    const isComplete = p.progress >= 100;
-    return `
-    <div class="proj ${isComplete?'complete':''}">
-      <div class="proj-head">
-        <span class="proj-name">${escapeHtml(p.name)}</span>
-        <button class="del-btn" onclick="deleteProject('${p.id}')">✕</button>
-      </div>
-      <div class="proj-meta">
-        ${isComplete ? '<span class="badge-done">تکمیل‌شده</span>' : '<span class="badge">در حال انجام</span>'}
-        <span>📅 ${formatJalali(p.start)}</span>
-        <span>🏁 ${formatJalali(p.end)}</span>
-      </div>
-      <div class="pct-row">
-        <input type="range" min="0" max="100" value="${p.progress}" oninput="updateProgress('${p.id}', this.value)">
-        <span class="num">${toFaDigits(p.progress)}٪</span>
-      </div>
-      <div class="bar"><div class="fill" style="width:${p.progress}%"></div></div>
+  const container =
+    document.getElementById('projList');
 
-      <div class="section-title">✅ کارهای انجام‌شده (${toFaDigits(doneCount)} از ${toFaDigits(p.tasks.length)})</div>
-      ${p.tasks.map((t,idx) => `
-        <div class="task ${t.done?'done':''}">
-          <input type="checkbox" ${t.done?'checked':''} onchange="toggleSubtask('${p.id}',${idx})">
-          <span>${escapeHtml(t.text)}</span>
-          <button class="del-btn" onclick="deleteSubtask('${p.id}',${idx})">✕</button>
-        </div>`).join('')}
-      <div class="subnew">
-        <input type="text" placeholder="کار جدید..." id="sub-${p.id}" onkeydown="if(event.key==='Enter')addSubtask('${p.id}')">
-        <button onclick="addSubtask('${p.id}')">افزودن</button>
-      </div>
+  const list =
+    getFilteredList();
 
-      <div class="section-title">📝 یادداشت</div>
-      <div class="note-box">
-        <textarea placeholder="یادداشت..." onchange="updateNote('${p.id}', this.value)">${escapeHtml(p.note||'')}</textarea>
+  if (list.length === 0) {
+
+    container.innerHTML =
+      '<div class="empty">کاری برای نمایش نیست</div>';
+
+    return;
+  }
+
+  container.innerHTML =
+    list.map(p => {
+
+      if (!Array.isArray(p.tasks)) {
+        p.tasks = [];
+      }
+
+      const doneCount =
+        p.tasks.filter(t => t.done).length;
+
+      const isComplete =
+        Number(p.progress) >= 100;
+
+      return `
+      <div class="proj ${isComplete?'complete':''}">
+
+        <div class="proj-head">
+
+          <span class="proj-name">
+            ${escapeHtml(p.name)}
+          </span>
+
+          <button
+            class="del-btn"
+            onclick="deleteProject('${p.id}')">
+            ✕
+          </button>
+
+        </div>
+
+
+        <div class="proj-meta">
+
+          ${
+            isComplete
+            ? '<span class="badge-done">تکمیل‌شده</span>'
+            : '<span class="badge">در حال انجام</span>'
+          }
+
+          <span>
+            📅 ${formatJalali(p.start)}
+          </span>
+
+          <span>
+            🏁 ${formatJalali(p.end)}
+          </span>
+
+        </div>
+
+
+        <div class="pct-row">
+
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="${Number(p.progress) || 0}"
+            oninput="updateProgress('${p.id}', this.value)">
+
+          <span class="num">
+            ${toFaDigits(Number(p.progress) || 0)}٪
+          </span>
+
+        </div>
+
+
+        <div class="bar">
+          <div
+            class="fill"
+            style="width:${Number(p.progress) || 0}%">
+          </div>
+        </div>
+
+
+        <div class="section-title">
+          ✅ کارهای انجام‌شده
+          (${toFaDigits(doneCount)}
+          از
+          ${toFaDigits(p.tasks.length)})
+        </div>
+
+
+        ${
+          p.tasks.map((t,idx) => `
+
+            <div class="task ${t.done?'done':''}">
+
+              <input
+                type="checkbox"
+                ${t.done?'checked':''}
+                onchange="toggleSubtask('${p.id}',${idx})">
+
+              <span>
+                ${escapeHtml(t.text)}
+              </span>
+
+              <button
+                class="del-btn"
+                onclick="deleteSubtask('${p.id}',${idx})">
+                ✕
+              </button>
+
+            </div>
+
+          `).join('')
+        }
+
+
+        <div class="subnew">
+
+          <input
+            type="text"
+            placeholder="کار جدید..."
+            id="sub-${p.id}"
+            onkeydown="if(event.key==='Enter')addSubtask('${p.id}')">
+
+          <button
+            onclick="addSubtask('${p.id}')">
+            افزودن
+          </button>
+
+        </div>
+
+
+        <div class="section-title">
+          📝 یادداشت
+        </div>
+
+
+        <div class="note-box">
+
+          <textarea
+            placeholder="یادداشت..."
+            onchange="updateNote('${p.id}', this.value)"
+          >${escapeHtml(p.note || '')}</textarea>
+
+        </div>
+
       </div>
-    </div>`;
-  }).join('');
+      `;
+
+    }).join('');
 }
+
+
+/* ===== گزارش مدیریت ===== */
 
 function openExport() {
-  let out = `گزارش پروژه‌ها - تاریخ تهیه: ${formatJalali(todayIso())}\n================================\n\n`;
+
+  let out =
+    `گزارش پروژه‌ها - تاریخ تهیه: ${formatJalali(todayIso())}\n` +
+    `================================\n\n`;
+
   projects.forEach(p => {
+
     out += `📌 ${p.name}\n`;
-    out += `  پیشرفت: ${toFaDigits(p.progress)}٪ | شروع: ${formatJalali(p.start)} | پایان: ${formatJalali(p.end)}\n`;
-    if (p.tasks.length) {
-      p.tasks.forEach(t => out += `  ${t.done?'✅':'⬜'} ${t.text}\n`);
+
+    out +=
+      `  پیشرفت: ${toFaDigits(p.progress)}٪ | ` +
+      `شروع: ${formatJalali(p.start)} | ` +
+      `پایان: ${formatJalali(p.end)}\n`;
+
+    if (p.tasks && p.tasks.length) {
+
+      p.tasks.forEach(t => {
+
+        out +=
+          `  ${t.done?'✅':'⬜'} ${t.text}\n`;
+      });
     }
-    if (p.note) out += `  یادداشت: ${p.note}\n`;
+
+    if (p.note) {
+
+      out +=
+        `  یادداشت: ${p.note}\n`;
+    }
+
     out += `\n`;
   });
+
   document.getElementById('exportText').value = out;
-  document.getElementById('exportModal').classList.add('open');
-}
-function todayIso() { const d = new Date(); return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`; }
-function closeExport() { document.getElementById('exportModal').classList.remove('open'); }
-function copyExport() {
-  const ta = document.getElementById('exportText');
-  ta.select(); ta.setSelectionRange(0, 999999);
-  try { document.execCommand('copy'); setStatus('گزارش کپی شد'); }
-  catch (e) { navigator.clipboard.writeText(ta.value).catch(()=>{}); }
+
+  document
+    .getElementById('exportModal')
+    .classList.add('open');
 }
 
+
+function todayIso() {
+
+  const d = new Date();
+
+  return `${d.getFullYear()}-${(d.getMonth()+1)
+    .toString()
+    .padStart(2,'0')}-${d.getDate()
+    .toString()
+    .padStart(2,'0')}`;
+}
+
+
+function closeExport() {
+
+  document
+    .getElementById('exportModal')
+    .classList.remove('open');
+}
+
+
+function copyExport() {
+
+  const ta =
+    document.getElementById('exportText');
+
+  ta.select();
+
+  ta.setSelectionRange(0, 999999);
+
+  try {
+
+    document.execCommand('copy');
+
+    setStatus('گزارش کپی شد');
+
+  } catch (e) {
+
+    navigator.clipboard
+      .writeText(ta.value)
+      .then(() => setStatus('گزارش کپی شد'))
+      .catch(() => {});
+  }
+}
+
+
+/* ===== شروع برنامه ===== */
+
+setupDateSelects();
+
 loadProjects();
+
 </script>
 </body>
 </html>
