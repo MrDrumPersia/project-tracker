@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   const REPO = "MrDrumPersia/project-tracker";
   const FILE = "data/projects.json";
 
-  const TOKEN = process.env.GITHUB_TOKEN;
+  const TOKEN = process.env.GH_TOKEN;
 
   if (!TOKEN) {
     return res.status(500).json({ error: "GITHUB_TOKEN تنظیم نشده است." });
