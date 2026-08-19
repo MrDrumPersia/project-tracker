@@ -5,7 +5,9 @@ export default async function handler(req, res) {
   const TOKEN = process.env.GH_TOKEN;
 
   if (!TOKEN) {
-    return res.status(500).json({ error: "GITHUB_TOKEN تنظیم نشده است." });
+    return res.status(500).json({
+      error: "GH_TOKEN تنظیم نشده است."
+    });
   }
 
   const headers = {
@@ -27,22 +29,28 @@ export default async function handler(req, res) {
 
     if (getFile.ok) {
       const fileData = await getFile.json();
+
       sha = fileData.sha;
 
       const content = decodeURIComponent(
-        escape(atob(fileData.content.replace(/\n/g, "")))
+        escape(
+          atob(
+            fileData.content.replace(/\n/g, "")
+          )
+        )
       );
 
       projects = JSON.parse(content);
     }
 
-    // GET = دریافت پروژه‌ها
+    // دریافت پروژه‌ها
     if (req.method === "GET") {
       return res.status(200).json(projects);
     }
 
-    // POST = ذخیره پروژه‌ها
+    // ذخیره پروژه‌ها
     if (req.method === "POST") {
+
       const newProjects = req.body;
 
       if (!Array.isArray(newProjects)) {
@@ -52,12 +60,16 @@ export default async function handler(req, res) {
       }
 
       const content = btoa(
-        unescape(encodeURIComponent(JSON.stringify(newProjects, null, 2)))
+        unescape(
+          encodeURIComponent(
+            JSON.stringify(newProjects, null, 2)
+          )
+        )
       );
 
       const body = {
         message: "Update projects",
-        content
+        content: content
       };
 
       if (sha) {
@@ -68,7 +80,7 @@ export default async function handler(req, res) {
         `https://api.github.com/repos/${REPO}/contents/${FILE}`,
         {
           method: "PUT",
-          headers,
+          headers: headers,
           body: JSON.stringify(body)
         }
       );
@@ -90,6 +102,9 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
+
+    console.error(error);
+
     return res.status(500).json({
       error: error.message
     });
