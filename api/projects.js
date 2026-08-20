@@ -1,7 +1,6 @@
 export default async function handler(req, res) {
   const REPO = "MrDrumPersia/project-tracker";
   const FILE = "data/projects.json";
-
   const TOKEN = process.env.GH_TOKEN;
 
   if (!TOKEN) {
@@ -22,208 +21,224 @@ export default async function handler(req, res) {
 
   try {
 
-    /* =================================================
-       GET
-       ================================================= */
+    /* =========================
+       دریافت فایل فعلی
+       ========================= */
 
-    if (req.method === "GET") {
+    const getResponse = await fetch(githubUrl, {
+      method: "GET",
+      headers,
+      cache: "no-store"
+    });
 
-      const response = await fetch(githubUrl, {
-        method: "GET",
-        headers
-      });
-
-      if (!response.ok) {
-
-        const errorData = await response.json().catch(() => ({}));
-
-        return res.status(response.status).json({
-          error:
-            errorData.message ||
-            "خطا در دریافت فایل پروژه‌ها از GitHub."
-        });
-      }
-
-      const fileData = await response.json();
-
-      if (!fileData.content) {
-        return res.status(200).json([]);
-      }
-
-      const cleanContent =
-        fileData.content.replace(/\n/g, "");
-
-      const decoded =
-        Buffer.from(
-          cleanContent,
-          "base64"
-        ).toString("utf8");
-
-      let projects = [];
-
-      try {
-        projects = JSON.parse(decoded);
-      } catch (e) {
-        projects = [];
-      }
-
-      return res.status(200).json(
-        Array.isArray(projects)
-          ? projects
-          : []
-      );
-    }
-
-
-    /* =================================================
-       فقط POST مجاز است
-       ================================================= */
-
-    if (req.method !== "POST") {
-
-      return res.status(405).json({
-        error: "Method Not Allowed"
-      });
-    }
-
-
-    /* =================================================
-       بررسی اطلاعات ارسالی
-       ================================================= */
-
-    const newProjects = req.body;
-
-    if (!Array.isArray(newProjects)) {
-
-      return res.status(400).json({
-        error:
-          "اطلاعات پروژه‌ها باید به صورت آرایه باشد."
-      });
-    }
-
-
-    /* =================================================
-       دریافت SHA فعلی فایل
-       ================================================= */
-
-    const currentFileResponse =
-      await fetch(githubUrl, {
-        method: "GET",
-        headers
-      });
-
+    let projects = [];
     let sha = null;
 
-    if (currentFileResponse.ok) {
+    if (getResponse.ok) {
 
-      const currentFile =
-        await currentFileResponse.json();
+      const fileData = await getResponse.json();
 
-      sha = currentFile.sha;
+      sha = fileData.sha;
 
-    } else if (currentFileResponse.status !== 404) {
+      if (fileData.content) {
+
+        const cleanContent =
+          fileData.content.replace(/\n/g, "");
+
+        const decoded =
+          Buffer.from(
+            cleanContent,
+            "base64"
+          ).toString("utf-8");
+
+        try {
+
+          projects = JSON.parse(decoded);
+
+          if (!Array.isArray(projects)) {
+            projects = [];
+          }
+
+        } catch (e) {
+
+          console.error(
+            "خطا در JSON:",
+            e
+          );
+
+          projects = [];
+        }
+      }
+
+    } else if (getResponse.status === 404) {
+
+      projects = [];
+
+    } else {
 
       const errorData =
-        await currentFileResponse
-          .json()
-          .catch(() => ({}));
+        await getResponse.json().catch(() => ({}));
 
       return res.status(
-        currentFileResponse.status
+        getResponse.status
       ).json({
         error:
           errorData.message ||
-          "خطا در دریافت اطلاعات فایل GitHub."
+          "خطا در دریافت فایل از GitHub"
       });
     }
 
 
-    /* =================================================
-       تبدیل JSON به Base64
-       ================================================= */
+    /* =========================
+       GET
+       ========================= */
 
-    const jsonText =
-      JSON.stringify(
-        newProjects,
-        null,
-        2
-      );
+    if (req.method === "GET") {
 
-    const content =
-      Buffer.from(
-        jsonText,
-        "utf8"
-      ).toString("base64");
+      return res.status(200).json(projects);
+
+    }
 
 
-    /* =================================================
-       ساخت درخواست GitHub
-       ================================================= */
+    /* =========================
+       POST
+       ========================= */
 
-    const body = {
+    if (req.method === "POST") {
 
-      message:
-        "Update projects",
+      let newProjects = req.body;
 
-      content:
+      if (
+        typeof newProjects === "string"
+      ) {
+
+        try {
+          newProjects =
+            JSON.parse(newProjects);
+        } catch (e) {
+
+          return res.status(400).json({
+            error:
+              "اطلاعات ارسالی معتبر نیست."
+          });
+
+        }
+      }
+
+      if (!Array.isArray(newProjects)) {
+
+        return res.status(400).json({
+          error:
+            "اطلاعات پروژه‌ها باید به صورت آرایه باشد."
+        });
+
+      }
+
+
+      /* =========================
+         تبدیل اطلاعات به JSON
+         ========================= */
+
+      const jsonText =
+        JSON.stringify(
+          newProjects,
+          null,
+          2
+        );
+
+
+      /* =========================
+         Base64 صحیح
+         ========================= */
+
+      const content =
+        Buffer.from(
+          jsonText,
+          "utf-8"
+        ).toString("base64");
+
+
+      /* =========================
+         اطلاعات آپدیت
+         ========================= */
+
+      const body = {
+
+        message:
+          "Update projects",
+
         content
 
-    };
+      };
 
-    if (sha) {
-      body.sha = sha;
-    }
-
-
-    /* =================================================
-       ذخیره در GitHub
-       ================================================= */
-
-    const updateResponse =
-      await fetch(
-        githubUrl,
-        {
-          method: "PUT",
-
-          headers,
-
-          body:
-            JSON.stringify(body)
-        }
-      );
+      if (sha) {
+        body.sha = sha;
+      }
 
 
-    const result =
-      await updateResponse
-        .json()
-        .catch(() => ({}));
+      /* =========================
+         ذخیره در GitHub
+         ========================= */
+
+      const updateResponse =
+        await fetch(
+          githubUrl,
+          {
+            method: "PUT",
+
+            headers,
+
+            body:
+              JSON.stringify(body)
+          }
+        );
 
 
-    if (!updateResponse.ok) {
+      const result =
+        await updateResponse
+          .json()
+          .catch(() => ({}));
 
-      return res.status(
-        updateResponse.status
-      ).json({
-        error:
-          result.message ||
-          "GitHub اجازه ذخیره فایل را نداد.",
-        details: result
+
+      if (!updateResponse.ok) {
+
+        console.error(
+          "GitHub Error:",
+          result
+        );
+
+        return res.status(
+          updateResponse.status
+        ).json({
+          error:
+            result.message ||
+            "GitHub اطلاعات را ذخیره نکرد."
+        });
+
+      }
+
+
+      return res.status(200).json({
+
+        success: true,
+
+        message:
+          "پروژه‌ها با موفقیت ذخیره شدند."
+
       });
+
     }
 
 
-    /* =================================================
-       موفق
-       ================================================= */
+    /* =========================
+       متد غیرمجاز
+       ========================= */
 
-    return res.status(200).json({
-
-      success: true,
-
-      message:
-        "پروژه‌ها با موفقیت ذخیره شدند."
-
+    return res.status(405).json({
+      error:
+        "Method Not Allowed"
     });
+
 
   } catch (error) {
 
@@ -233,11 +248,9 @@ export default async function handler(req, res) {
     );
 
     return res.status(500).json({
-
       error:
         error.message ||
-        "خطای داخلی سرور."
-
+        "خطای داخلی سرور"
     });
 
   }
