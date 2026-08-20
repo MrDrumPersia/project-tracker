@@ -4,90 +4,483 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>پیگیری پروژه‌ها</title>
+
 <style>
   * { box-sizing: border-box; }
-  body { font-family: Tahoma, Vazirmatn, Arial, sans-serif; background:#f4f5f7; margin:0; padding:16px; color:#222; }
-  .wrap { max-width: 640px; margin: 0 auto; }
 
-  .hint { background:#eef2ff; border-radius:10px; padding:14px 16px; font-size:13px; color:#3730a3; margin-bottom:16px; line-height:2; text-align:center; }
-
-  .card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 1px 4px rgba(0,0,0,0.08); margin-bottom:14px; }
-  label { font-size:13px; color:#555; display:block; margin-bottom:6px; }
-  input, select, textarea {
-    width:100%; padding:11px 12px; border:1px solid #dcdfe4; border-radius:10px;
-    font-size:14px; font-family:inherit; margin-bottom:12px; background:#fafbfc;
+  body {
+    font-family: Tahoma, Vazirmatn, Arial, sans-serif;
+    background:#f4f5f7;
+    margin:0;
+    padding:16px;
+    color:#222;
   }
-  textarea { resize:vertical; min-height:60px; }
 
-  .row2 { display:flex; gap:8px; }
-  .row2 > div { flex:1; min-width:0; }
+  .wrap {
+    max-width:640px;
+    margin:0 auto;
+  }
 
-  .jdate-row { display:flex; gap:6px; }
-  .jdate-row select { margin-bottom:12px; padding:11px 4px; text-align:center; }
+  .hint {
+    background:#eef2ff;
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:13px;
+    color:#3730a3;
+    margin-bottom:16px;
+    line-height:2;
+    text-align:center;
+  }
+
+  .card {
+    background:#fff;
+    border-radius:12px;
+    padding:14px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom:14px;
+  }
+
+  label {
+    font-size:13px;
+    color:#555;
+    display:block;
+    margin-bottom:6px;
+  }
+
+  input, select, textarea {
+    width:100%;
+    padding:11px 12px;
+    border:1px solid #dcdfe4;
+    border-radius:10px;
+    font-size:14px;
+    font-family:inherit;
+    margin-bottom:12px;
+    background:#fafbfc;
+  }
+
+  textarea {
+    resize:vertical;
+    min-height:60px;
+  }
+
+  .row2 {
+    display:flex;
+    gap:8px;
+  }
+
+  .row2 > div {
+    flex:1;
+    min-width:0;
+  }
+
+  .jdate-row {
+    display:flex;
+    gap:6px;
+  }
+
+  .jdate-row select {
+    margin-bottom:12px;
+    padding:11px 4px;
+    text-align:center;
+  }
+
+  .edit-date-row {
+    display:flex;
+    gap:6px;
+  }
+
+  .edit-date-row select {
+    margin-bottom:8px;
+    padding:9px 4px;
+    text-align:center;
+  }
 
   button.add-btn {
-    width:100%; padding:13px; background:#2563eb; color:#fff; border:none; border-radius:10px;
-    font-size:15px; font-weight:bold; cursor:pointer;
+    width:100%;
+    padding:13px;
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
   }
-  button.add-btn:hover { background:#1e4fc4; }
 
-  .tabs { display:flex; gap:6px; margin-bottom:12px; }
-  .tabs button { flex:1; padding:11px 4px; border:none; border-radius:10px; background:#e8eaed; cursor:pointer; font-size:13px; color:#444; }
-  .tabs button.active { background:#2563eb; color:#fff; font-weight:bold; }
+  button.add-btn:hover {
+    background:#1e4fc4;
+  }
 
-  .export-bar { margin-bottom:14px; }
+  .tabs {
+    display:flex;
+    gap:6px;
+    margin-bottom:12px;
+  }
+
+  .tabs button {
+    flex:1;
+    padding:11px 4px;
+    border:none;
+    border-radius:10px;
+    background:#e8eaed;
+    cursor:pointer;
+    font-size:13px;
+    color:#444;
+  }
+
+  .tabs button.active {
+    background:#2563eb;
+    color:#fff;
+    font-weight:bold;
+  }
+
+  .export-bar {
+    margin-bottom:14px;
+  }
+
   .export-bar button {
-    width:100%; padding:11px 4px; border:1px solid #2563eb; background:#fff; color:#2563eb;
-    border-radius:10px; font-size:13px; cursor:pointer; font-weight:bold;
+    width:100%;
+    padding:11px 4px;
+    border:1px solid #2563eb;
+    background:#fff;
+    color:#2563eb;
+    border-radius:10px;
+    font-size:13px;
+    cursor:pointer;
+    font-weight:bold;
   }
-  .export-bar button:hover { background:#eef2ff; }
 
-  .proj { background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.07); border-right:4px solid #2563eb; }
-  .proj.complete { border-right-color:#16a34a; background:#f0fdf4; }
-  .proj-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-  .proj-name { font-size:15px; font-weight:bold; }
-  .del-btn { background:none; border:none; color:#c0392b; cursor:pointer; font-size:16px; padding:2px 6px; }
+  .export-bar button:hover {
+    background:#eef2ff;
+  }
 
-  .proj-meta { font-size:12px; color:#888; display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
-  .badge { background:#eef2ff; color:#3730a3; padding:2px 8px; border-radius:20px; font-size:11px; }
-  .badge-done { background:#dcfce7; color:#166534; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:bold; }
+  .proj {
+    background:#fff;
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:12px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.07);
+    border-right:4px solid #2563eb;
+  }
 
-  .bar { background:#e5e7eb; border-radius:8px; height:9px; overflow:hidden; margin-bottom:4px; }
-  .fill { background:linear-gradient(90deg,#3b82f6,#1d4ed8); height:100%; border-radius:8px; }
-  .pct-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px; }
-  .pct-row .num { font-size:13.5px; font-weight:bold; color:#1d4ed8; white-space:nowrap; }
-  .pct-row input[type=range] { flex:1; }
+  .proj.complete {
+    border-right-color:#16a34a;
+    background:#f0fdf4;
+  }
 
-  .section-title { font-size:12px; color:#555; font-weight:bold; margin:10px 0 6px; }
-  .task { display:flex; align-items:center; gap:8px; background:#fafbfc; border:1px solid #eee; border-radius:8px; padding:7px 10px; margin-bottom:6px; font-size:13.5px; }
-  .task.done { background:#f0fdf4; border-color:#dcfce7; }
-  .task.done span { text-decoration:line-through; color:#888; }
-  .task input[type=checkbox] { width:17px; height:17px; flex-shrink:0; cursor:pointer; }
-  .task span { flex:1; word-break:break-word; }
+  .proj-head {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:6px;
+  }
 
-  .subnew { display:flex; gap:6px; margin-bottom:8px; }
-  .subnew input { margin-bottom:0; }
-  .subnew button { padding:9px 14px; background:#2563eb; color:#fff; border:none; border-radius:8px; font-size:13px; cursor:pointer; }
+  .proj-name {
+    font-size:15px;
+    font-weight:bold;
+  }
 
-  .note-box { background:#fdf9f0; border:1px solid #f5ecd7; border-right:3px solid #eab308; border-radius:8px; padding:2px 4px; }
-  .note-box textarea { background:transparent; border:none; margin-bottom:0; color:#6b5a1f; }
+  .proj-head-actions {
+    display:flex;
+    align-items:center;
+    gap:2px;
+  }
 
-  .empty { text-align:center; color:#999; padding:30px 10px; font-size:14px; }
-  .status { text-align:center; font-size:12px; color:#999; margin-top:10px; min-height:18px; }
+  .edit-btn {
+    background:none;
+    border:none;
+    color:#2563eb;
+    cursor:pointer;
+    font-size:16px;
+    padding:2px 6px;
+  }
 
-  .modal-bg { display:none; position:fixed; top:0; right:0; left:0; bottom:0; background:rgba(0,0,0,0.45); z-index:50; align-items:center; justify-content:center; padding:20px; }
-  .modal-bg.open { display:flex; }
-  .modal { background:#fff; border-radius:12px; max-width:560px; width:100%; max-height:80vh; display:flex; flex-direction:column; padding:16px; }
-  .modal h3 { margin:0 0 10px; font-size:16px; }
-  .modal textarea { flex:1; min-height:300px; font-family:monospace,Tahoma; font-size:13px; white-space:pre-wrap; }
-  .modal-actions { display:flex; gap:8px; margin-top:10px; }
-  .modal-actions button { flex:1; padding:10px; border-radius:8px; border:none; cursor:pointer; font-size:14px; }
-  .btn-copy { background:#2563eb; color:#fff; }
-  .btn-close { background:#e8eaed; color:#333; }
+  .edit-btn:hover {
+    background:#eef2ff;
+    border-radius:6px;
+  }
+
+  .del-btn {
+    background:none;
+    border:none;
+    color:#c0392b;
+    cursor:pointer;
+    font-size:16px;
+    padding:2px 6px;
+  }
+
+  .edit-box {
+    background:#f8fafc;
+    border:1px solid #dbe3ef;
+    border-radius:10px;
+    padding:10px;
+    margin:8px 0 12px;
+  }
+
+  .edit-box label {
+    margin-bottom:5px;
+    font-weight:bold;
+  }
+
+  .edit-box input {
+    margin-bottom:9px;
+  }
+
+  .edit-actions {
+    display:flex;
+    gap:7px;
+    margin-top:3px;
+  }
+
+  .edit-actions button {
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:bold;
+  }
+
+  .save-edit {
+    background:#16a34a;
+    color:#fff;
+  }
+
+  .save-edit:hover {
+    background:#15803d;
+  }
+
+  .cancel-edit {
+    background:#e5e7eb;
+    color:#333;
+  }
+
+  .cancel-edit:hover {
+    background:#d1d5db;
+  }
+
+  .proj-meta {
+    font-size:12px;
+    color:#888;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+
+  .badge {
+    background:#eef2ff;
+    color:#3730a3;
+    padding:2px 8px;
+    border-radius:20px;
+    font-size:11px;
+  }
+
+  .badge-done {
+    background:#dcfce7;
+    color:#166534;
+    padding:2px 8px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:bold;
+  }
+
+  .bar {
+    background:#e5e7eb;
+    border-radius:8px;
+    height:9px;
+    overflow:hidden;
+    margin-bottom:4px;
+  }
+
+  .fill {
+    background:linear-gradient(90deg,#3b82f6,#1d4ed8);
+    height:100%;
+    border-radius:8px;
+  }
+
+  .pct-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    gap:10px;
+  }
+
+  .pct-row .num {
+    font-size:13.5px;
+    font-weight:bold;
+    color:#1d4ed8;
+    white-space:nowrap;
+  }
+
+  .pct-row input[type=range] {
+    flex:1;
+  }
+
+  .section-title {
+    font-size:12px;
+    color:#555;
+    font-weight:bold;
+    margin:10px 0 6px;
+  }
+
+  .task {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#fafbfc;
+    border:1px solid #eee;
+    border-radius:8px;
+    padding:7px 10px;
+    margin-bottom:6px;
+    font-size:13.5px;
+  }
+
+  .task.done {
+    background:#f0fdf4;
+    border-color:#dcfce7;
+  }
+
+  .task.done span {
+    text-decoration:line-through;
+    color:#888;
+  }
+
+  .task input[type=checkbox] {
+    width:17px;
+    height:17px;
+    flex-shrink:0;
+    cursor:pointer;
+  }
+
+  .task span {
+    flex:1;
+    word-break:break-word;
+  }
+
+  .subnew {
+    display:flex;
+    gap:6px;
+    margin-bottom:8px;
+  }
+
+  .subnew input {
+    margin-bottom:0;
+  }
+
+  .subnew button {
+    padding:9px 14px;
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:13px;
+    cursor:pointer;
+  }
+
+  .note-box {
+    background:#fdf9f0;
+    border:1px solid #f5ecd7;
+    border-right:3px solid #eab308;
+    border-radius:8px;
+    padding:2px 4px;
+  }
+
+  .note-box textarea {
+    background:transparent;
+    border:none;
+    margin-bottom:0;
+    color:#6b5a1f;
+  }
+
+  .empty {
+    text-align:center;
+    color:#999;
+    padding:30px 10px;
+    font-size:14px;
+  }
+
+  .status {
+    text-align:center;
+    font-size:12px;
+    color:#999;
+    margin-top:10px;
+    min-height:18px;
+  }
+
+  .modal-bg {
+    display:none;
+    position:fixed;
+    top:0;
+    right:0;
+    left:0;
+    bottom:0;
+    background:rgba(0,0,0,0.45);
+    z-index:50;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+
+  .modal-bg.open {
+    display:flex;
+  }
+
+  .modal {
+    background:#fff;
+    border-radius:12px;
+    max-width:560px;
+    width:100%;
+    max-height:80vh;
+    display:flex;
+    flex-direction:column;
+    padding:16px;
+  }
+
+  .modal h3 {
+    margin:0 0 10px;
+    font-size:16px;
+  }
+
+  .modal textarea {
+    flex:1;
+    min-height:300px;
+    font-family:monospace,Tahoma;
+    font-size:13px;
+    white-space:pre-wrap;
+  }
+
+  .modal-actions {
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+
+  .modal-actions button {
+    flex:1;
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-size:14px;
+  }
+
+  .btn-copy {
+    background:#2563eb;
+    color:#fff;
+  }
+
+  .btn-close {
+    background:#e8eaed;
+    color:#333;
+  }
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
 
   <div class="hint">
@@ -96,166 +489,311 @@
   </div>
 
   <div class="card">
+
     <label>نام شرکت / پروژه</label>
-    <input id="projName" placeholder="مثلاً: فولاد آذین صنعت">
+
+    <input
+      id="projName"
+      placeholder="مثلاً: فولاد آذین صنعت">
 
     <div class="row2">
+
       <div>
+
         <label>تاریخ شروع (شمسی)</label>
+
         <div class="jdate-row">
+
           <select id="sYear"></select>
+
           <select id="sMonth"></select>
+
           <select id="sDay"></select>
+
         </div>
+
       </div>
+
     </div>
 
     <div class="row2">
+
       <div>
+
         <label>تاریخ اتمام (شمسی)</label>
+
         <div class="jdate-row">
+
           <select id="eYear"></select>
+
           <select id="eMonth"></select>
+
           <select id="eDay"></select>
+
         </div>
+
       </div>
+
     </div>
 
-    <button class="add-btn" onclick="addProject()">افزودن پروژه</button>
+    <button
+      class="add-btn"
+      onclick="addProject()">
+      افزودن پروژه
+    </button>
+
   </div>
+
 
   <div class="tabs">
-    <button id="tab-pending" class="active" onclick="setTab('pending')">در حال انجام</button>
-    <button id="tab-done" onclick="setTab('done')">تکمیل‌شده</button>
-    <button id="tab-all" onclick="setTab('all')">همه</button>
+
+    <button
+      id="tab-pending"
+      class="active"
+      onclick="setTab('pending')">
+      در حال انجام
+    </button>
+
+    <button
+      id="tab-done"
+      onclick="setTab('done')">
+      تکمیل‌شده
+    </button>
+
+    <button
+      id="tab-all"
+      onclick="setTab('all')">
+      همه
+    </button>
+
   </div>
+
 
   <div class="export-bar">
-    <button onclick="openExport()">📋 تهیه گزارش برای مدیریت</button>
+
+    <button onclick="openExport()">
+      📋 تهیه گزارش برای مدیریت
+    </button>
+
   </div>
+
 
   <div id="projList"></div>
-  <div class="status" id="statusLine"></div>
+
+  <div
+    class="status"
+    id="statusLine">
+  </div>
+
 </div>
 
-<div class="modal-bg" id="exportModal">
+
+<div
+  class="modal-bg"
+  id="exportModal">
+
   <div class="modal">
+
     <h3>گزارش پروژه‌ها</h3>
-    <textarea id="exportText" readonly></textarea>
+
+    <textarea
+      id="exportText"
+      readonly></textarea>
+
     <div class="modal-actions">
-      <button class="btn-copy" onclick="copyExport()">کپی متن گزارش</button>
-      <button class="btn-close" onclick="closeExport()">بستن</button>
+
+      <button
+        class="btn-copy"
+        onclick="copyExport()">
+        کپی متن گزارش
+      </button>
+
+      <button
+        class="btn-close"
+        onclick="closeExport()">
+        بستن
+      </button>
+
     </div>
+
   </div>
+
 </div>
+
 
 <script>
-/* ===== تبدیل تاریخ میلادی <-> شمسی ===== */
+
+/* =====================================================
+   تبدیل تاریخ میلادی <-> شمسی
+   ===================================================== */
 
 function gregorianToJalali(gy, gm, gd) {
-  var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+
+  var g_d_m = [
+    0,31,59,90,120,151,
+    181,212,243,273,304,334
+  ];
+
   var jy = (gy<=1600)?0:979;
+
   gy -= (gy<=1600)?621:1600;
+
   var gy2 = (gm>2)?(gy+1):gy;
-  var days = (365*gy)
+
+  var days =
+    (365*gy)
     +(parseInt((gy2+3)/4))
     -(parseInt((gy2+99)/100))
     +(parseInt((gy2+399)/400))
     -80+gd+g_d_m[gm-1];
 
   jy += 33*parseInt(days/12053);
+
   days %= 12053;
 
   jy += 4*parseInt(days/1461);
+
   days %= 1461;
 
   if (days > 365) {
+
     jy += parseInt((days-1)/365);
+
     days = (days-1)%365;
+
   }
 
-  var jm = (days < 186)
+  var jm =
+    (days < 186)
     ? 1+parseInt(days/31)
     : 7+parseInt((days-186)/30);
 
-  var jd = 1 + (
-    (days < 186)
+  var jd =
+    1 +
+    (
+      (days < 186)
       ? (days%31)
       : ((days-186)%30)
-  );
+    );
 
-  return [jy, jm, jd];
+  return [jy,jm,jd];
 }
 
-function jalaliToGregorian(jy, jm, jd) {
+
+function jalaliToGregorian(jy,jm,jd) {
+
   var gy = (jy<=979)?621:1600;
 
   jy -= (jy<=979)?0:979;
 
   var days =
     (365*jy)
-    + (parseInt(jy/33)*8)
-    + parseInt(((jy%33)+3)/4)
-    + 78
-    + jd
-    + ((jm<7)
+    +(parseInt(jy/33)*8)
+    +parseInt(((jy%33)+3)/4)
+    +78
+    +jd
+    +(
+      (jm<7)
       ? (jm-1)*31
-      : ((jm-7)*30)+186);
+      : ((jm-7)*30)+186
+    );
 
   gy += 400*parseInt(days/146097);
+
   days %= 146097;
 
   if (days > 36524) {
+
     gy += 100*parseInt(--days/36524);
+
     days %= 36524;
 
     if (days >= 365) days++;
+
   }
 
   gy += 4*parseInt(days/1461);
+
   days %= 1461;
 
   if (days > 365) {
+
     gy += parseInt((days-1)/365);
+
     days = (days-1)%365;
+
   }
 
   var gd = days + 1;
 
   var sal_a = [
-    0,31,
-    ((gy%4===0&&gy%100!==0)||(gy%400===0))?29:28,
-    31,30,31,30,31,31,30,31,30,31
+    0,
+    31,
+    (
+      (gy%4===0&&gy%100!==0)
+      ||
+      (gy%400===0)
+    )
+    ?29
+    :28,
+    31,30,31,30,
+    31,31,30,31,30,31
   ];
 
   var gm;
 
-  for (gm=1; gm<13; gm++) {
+  for (gm=1;gm<13;gm++) {
+
     var v = sal_a[gm];
 
     if (gd <= v) break;
 
     gd -= v;
+
   }
 
-  return [gy, gm, gd];
+  return [gy,gm,gd];
 }
+
+
+/* =====================================================
+   اطلاعات تاریخ
+   ===================================================== */
 
 const jMonthNames = [
-  'فروردین','اردیبهشت','خرداد','تیر',
-  'مرداد','شهریور','مهر','آبان',
-  'آذر','دی','بهمن','اسفند'
+  'فروردین',
+  'اردیبهشت',
+  'خرداد',
+  'تیر',
+  'مرداد',
+  'شهریور',
+  'مهر',
+  'آبان',
+  'آذر',
+  'دی',
+  'بهمن',
+  'اسفند'
 ];
+
 
 const faDigits = [
-  '۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'
+  '۰','۱','۲','۳','۴',
+  '۵','۶','۷','۸','۹'
 ];
 
+
 function toFaDigits(n) {
-  return String(n).replace(/[0-9]/g, d => faDigits[d]);
+
+  return String(n).replace(
+    /[0-9]/g,
+    d => faDigits[d]
+  );
+
 }
 
+
 function todayJalali() {
+
   const now = new Date();
 
   return gregorianToJalali(
@@ -263,125 +801,349 @@ function todayJalali() {
     now.getMonth()+1,
     now.getDate()
   );
+
 }
 
-function isoFromJalali(jy, jm, jd) {
-  const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd);
+
+function isoFromJalali(jy,jm,jd) {
+
+  const [gy,gm,gd] =
+    jalaliToGregorian(jy,jm,jd);
 
   return `${gy.toString().padStart(4,'0')}-${gm.toString().padStart(2,'0')}-${gd.toString().padStart(2,'0')}`;
+
 }
+
 
 function jalaliFromIso(iso) {
-  const [gy, gm, gd] = iso.split('-').map(Number);
 
-  return gregorianToJalali(gy, gm, gd);
+  if (!iso) return todayJalali();
+
+  const [gy,gm,gd] =
+    iso.split('-').map(Number);
+
+  return gregorianToJalali(
+    gy,gm,gd
+  );
+
 }
+
 
 function formatJalali(iso) {
+
   if(!iso) return '—';
 
-  const [jy, jm, jd] = jalaliFromIso(iso);
+  const [jy,jm,jd] =
+    jalaliFromIso(iso);
 
   return `${toFaDigits(jd)} ${jMonthNames[jm-1]} ${toFaDigits(jy)}`;
+
 }
 
-function fillDateSelect(yearSel, monthSel, daySel, jy, jm, jd) {
+
+/* =====================================================
+   ساخت انتخابگر تاریخ شمسی
+   ===================================================== */
+
+function getJalaliMonthDays(year,month) {
+
+  if (month <= 6) return 31;
+
+  if (month <= 11) return 30;
+
+  const gy =
+    jalaliToGregorian(year,12,1)[0];
+
+  const nextYear =
+    jalaliToGregorian(year+1,1,1)[0];
+
+  const lastDay =
+    jalaliToGregorian(
+      year,
+      12,
+      30
+    );
+
+  if (
+    lastDay[1] === 3 &&
+    lastDay[2] === 20
+  ) {
+    return 30;
+  }
+
+  return 29;
+}
+
+
+function updateDayOptions(
+  yearSel,
+  monthSel,
+  daySel,
+  selectedDay
+) {
+
+  const year =
+    parseInt(yearSel.value);
+
+  const month =
+    parseInt(monthSel.value);
+
+  let maxDay;
+
+  if (month <= 6) {
+
+    maxDay = 31;
+
+  } else if (month <= 11) {
+
+    maxDay = 30;
+
+  } else {
+
+    const nextYearFirst =
+      jalaliToGregorian(
+        year+1,
+        1,
+        1
+      );
+
+    const lastEsfand =
+      jalaliToGregorian(
+        year,
+        12,
+        30
+      );
+
+    if (
+      lastEsfand[0] === nextYearFirst[0] &&
+      lastEsfand[1] === 3 &&
+      lastEsfand[2] === 20
+    ) {
+
+      maxDay = 30;
+
+    } else {
+
+      maxDay = 29;
+
+    }
+
+  }
+
+  const currentDay =
+    parseInt(selectedDay || daySel.value || 1);
+
+  daySel.innerHTML = '';
+
+  for(let d=1; d<=maxDay; d++) {
+
+    daySel.innerHTML +=
+      `<option value="${d}">${toFaDigits(d)}</option>`;
+
+  }
+
+  daySel.value =
+    Math.min(currentDay,maxDay);
+
+}
+
+
+function fillDateSelect(
+  yearSel,
+  monthSel,
+  daySel,
+  jy,
+  jm,
+  jd
+) {
 
   yearSel.innerHTML = '';
 
-  for (let y=jy-1; y<=jy+2; y++) {
+  for(
+    let y=jy-1;
+    y<=jy+2;
+    y++
+  ) {
+
     yearSel.innerHTML +=
       `<option value="${y}" ${y===jy?'selected':''}>${toFaDigits(y)}</option>`;
+
   }
 
   monthSel.innerHTML = '';
 
-  jMonthNames.forEach((name, idx) => {
-    monthSel.innerHTML +=
-      `<option value="${idx+1}" ${idx+1===jm?'selected':''}>${name}</option>`;
-  });
+  jMonthNames.forEach(
+    (name,idx) => {
 
-  daySel.innerHTML = '';
+      monthSel.innerHTML +=
+        `<option value="${idx+1}" ${idx+1===jm?'selected':''}>${name}</option>`;
 
-  for (let d=1; d<=31; d++) {
-    daySel.innerHTML +=
-      `<option value="${d}" ${d===jd?'selected':''}>${toFaDigits(d)}</option>`;
-  }
+    }
+  );
+
+  updateDayOptions(
+    yearSel,
+    monthSel,
+    daySel,
+    jd
+  );
+
 }
+
 
 function setupDateSelects() {
 
-  const [ty, tm, td] = todayJalali();
+  const [ty,tm,td] =
+    todayJalali();
 
   fillDateSelect(
     document.getElementById('sYear'),
     document.getElementById('sMonth'),
     document.getElementById('sDay'),
-    ty, tm, td
+    ty,tm,td
   );
 
   fillDateSelect(
     document.getElementById('eYear'),
     document.getElementById('eMonth'),
     document.getElementById('eDay'),
-    ty, tm, td
+    ty,tm,td
   );
+
+  document.getElementById('sMonth')
+    .onchange = function() {
+
+      updateDayOptions(
+        document.getElementById('sYear'),
+        document.getElementById('sMonth'),
+        document.getElementById('sDay')
+      );
+
+    };
+
+  document.getElementById('sYear')
+    .onchange = function() {
+
+      updateDayOptions(
+        document.getElementById('sYear'),
+        document.getElementById('sMonth'),
+        document.getElementById('sDay')
+      );
+
+    };
+
+  document.getElementById('eMonth')
+    .onchange = function() {
+
+      updateDayOptions(
+        document.getElementById('eYear'),
+        document.getElementById('eMonth'),
+        document.getElementById('eDay')
+      );
+
+    };
+
+  document.getElementById('eYear')
+    .onchange = function() {
+
+      updateDayOptions(
+        document.getElementById('eYear'),
+        document.getElementById('eMonth'),
+        document.getElementById('eDay')
+      );
+
+    };
+
 }
+
 
 function getIso(prefix) {
 
-  const jd = parseInt(
-    document.getElementById(prefix+'Day').value
+  const jd =
+    parseInt(
+      document.getElementById(
+        prefix+'Day'
+      ).value
+    );
+
+  const jm =
+    parseInt(
+      document.getElementById(
+        prefix+'Month'
+      ).value
+    );
+
+  const jy =
+    parseInt(
+      document.getElementById(
+        prefix+'Year'
+      ).value
+    );
+
+  return isoFromJalali(
+    jy,jm,jd
   );
 
-  const jm = parseInt(
-    document.getElementById(prefix+'Month').value
-  );
-
-  const jy = parseInt(
-    document.getElementById(prefix+'Year').value
-  );
-
-  return isoFromJalali(jy, jm, jd);
 }
 
 
 /* =====================================================
-   ذخیره‌سازی از طریق API
+   ذخیره‌سازی API
    ===================================================== */
 
 let projects = [];
+
 let currentTab = 'pending';
+
+let editingProjectId = null;
 
 const API_URL = '/api/projects';
 
 
-/* ===== دریافت پروژه‌ها ===== */
+/* =====================================================
+   دریافت پروژه‌ها
+   ===================================================== */
 
 async function loadProjects() {
 
-  setStatus('در حال دریافت اطلاعات...');
+  setStatus(
+    'در حال دریافت اطلاعات...'
+  );
 
   try {
 
-    const response = await fetch(API_URL, {
-      method: 'GET',
-      cache: 'no-store'
-    });
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method:'GET',
+          cache:'no-store'
+        }
+      );
 
     if (!response.ok) {
-      throw new Error('خطا در دریافت اطلاعات');
+
+      throw new Error(
+        'خطا در دریافت اطلاعات'
+      );
+
     }
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
-    projects = Array.isArray(data) ? data : [];
+    projects =
+      Array.isArray(data)
+      ? data
+      : [];
 
     render();
 
-    setStatus('اطلاعات دریافت شد');
+    setStatus(
+      'اطلاعات دریافت شد'
+    );
 
-  } catch (error) {
+  } catch(error) {
 
     console.error(error);
 
@@ -389,182 +1151,480 @@ async function loadProjects() {
 
     render();
 
-    setStatus('خطا در دریافت اطلاعات');
+    setStatus(
+      'خطا در دریافت اطلاعات'
+    );
+
   }
+
 }
 
 
-/* ===== ذخیره پروژه‌ها ===== */
+/* =====================================================
+   ذخیره پروژه‌ها
+   ===================================================== */
 
 async function saveProjects() {
 
-  setStatus('در حال ذخیره...');
+  setStatus(
+    'در حال ذخیره...'
+  );
 
   try {
 
-    const response = await fetch(API_URL, {
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method:'POST',
 
-      method: 'POST',
+          headers:{
+            'Content-Type':
+              'application/json'
+          },
 
-      headers: {
-        'Content-Type': 'application/json'
-      },
-
-      body: JSON.stringify(projects)
-    });
+          body:
+            JSON.stringify(projects)
+        }
+      );
 
     if (!response.ok) {
 
-      let errorText = 'خطا در ذخیره‌سازی';
+      let errorText =
+        'خطا در ذخیره‌سازی';
 
       try {
-        const errorData = await response.json();
 
-        if (errorData.error) {
-          errorText = errorData.error;
+        const errorData =
+          await response.json();
+
+        if(errorData.error) {
+
+          errorText =
+            errorData.error;
+
         }
 
-      } catch (_) {}
+      } catch(_) {}
 
-      throw new Error(errorText);
+      throw new Error(
+        errorText
+      );
+
     }
 
-    setStatus('ذخیره شد');
+    setStatus(
+      'ذخیره شد'
+    );
 
-  } catch (error) {
+  } catch(error) {
 
     console.error(error);
 
-    setStatus('خطا در ذخیره‌سازی');
-    alert('ذخیره‌سازی انجام نشد:\n' + error.message);
+    setStatus(
+      'خطا در ذخیره‌سازی'
+    );
+
+    alert(
+      'ذخیره‌سازی انجام نشد:\n'
+      + error.message
+    );
+
   }
+
 }
 
 
 function setStatus(msg) {
 
-  document.getElementById('statusLine').textContent = msg;
+  document.getElementById(
+    'statusLine'
+  ).textContent = msg;
 
-  setTimeout(() => {
-    document.getElementById('statusLine').textContent = '';
-  }, 2000);
+  setTimeout(
+    () => {
+
+      document.getElementById(
+        'statusLine'
+      ).textContent = '';
+
+    },
+    2000
+  );
+
 }
 
 
-/* ===== افزودن پروژه ===== */
+/* =====================================================
+   افزودن پروژه
+   ===================================================== */
 
 async function addProject() {
 
   const name =
-    document.getElementById('projName').value.trim();
+    document.getElementById(
+      'projName'
+    ).value.trim();
 
-  if (!name) {
-    alert('نام شرکت یا پروژه را وارد کنید');
+  if(!name) {
+
+    alert(
+      'نام شرکت یا پروژه را وارد کنید'
+    );
+
     return;
+
   }
 
   projects.unshift({
 
-    id: Date.now().toString(),
+    id:
+      Date.now().toString(),
 
     name,
 
-    start: getIso('s'),
+    start:
+      getIso('s'),
 
-    end: getIso('e'),
+    end:
+      getIso('e'),
 
-    progress: 0,
+    progress:0,
 
-    tasks: [],
+    tasks:[],
 
-    note: ''
+    note:''
   });
 
-  document.getElementById('projName').value = '';
+  document.getElementById(
+    'projName'
+  ).value = '';
 
   setupDateSelects();
 
   render();
 
   await saveProjects();
+
 }
 
 
-/* ===== حذف پروژه ===== */
+/* =====================================================
+   حذف پروژه
+   ===================================================== */
 
 async function deleteProject(id) {
 
-  if (!confirm('این پروژه حذف شود؟')) {
+  if(
+    !confirm(
+      'این پروژه حذف شود؟'
+    )
+  ) {
+
     return;
+
   }
 
   projects =
-    projects.filter(p => p.id !== id);
+    projects.filter(
+      p => p.id !== id
+    );
 
   render();
 
   await saveProjects();
+
 }
 
 
-/* ===== تغییر درصد پیشرفت ===== */
+/* =====================================================
+   شروع ویرایش پروژه
+   ===================================================== */
 
-async function updateProgress(id, val) {
+function startEditProject(id) {
+
+  editingProjectId = id;
+
+  render();
+
+}
+
+
+/* =====================================================
+   لغو ویرایش
+   ===================================================== */
+
+function cancelEditProject() {
+
+  editingProjectId = null;
+
+  render();
+
+}
+
+
+/* =====================================================
+   آماده‌سازی انتخابگر تاریخ ویرایش
+   ===================================================== */
+
+function setupEditDateSelects(
+  id,
+  prefix,
+  iso
+) {
+
+  const [jy,jm,jd] =
+    jalaliFromIso(iso);
+
+  const yearSel =
+    document.getElementById(
+      `edit-${prefix}-year-${id}`
+    );
+
+  const monthSel =
+    document.getElementById(
+      `edit-${prefix}-month-${id}`
+    );
+
+  const daySel =
+    document.getElementById(
+      `edit-${prefix}-day-${id}`
+    );
+
+  if(!yearSel ||
+     !monthSel ||
+     !daySel) {
+
+    return;
+
+  }
+
+  fillDateSelect(
+    yearSel,
+    monthSel,
+    daySel,
+    jy,
+    jm,
+    jd
+  );
+
+  yearSel.onchange =
+    function() {
+
+      updateDayOptions(
+        yearSel,
+        monthSel,
+        daySel
+      );
+
+    };
+
+  monthSel.onchange =
+    function() {
+
+      updateDayOptions(
+        yearSel,
+        monthSel,
+        daySel
+      );
+
+    };
+
+}
+
+
+/* =====================================================
+   گرفتن تاریخ از انتخابگر ویرایش
+   ===================================================== */
+
+function getEditIso(
+  id,
+  prefix
+) {
+
+  const year =
+    parseInt(
+      document.getElementById(
+        `edit-${prefix}-year-${id}`
+      ).value
+    );
+
+  const month =
+    parseInt(
+      document.getElementById(
+        `edit-${prefix}-month-${id}`
+      ).value
+    );
+
+  const day =
+    parseInt(
+      document.getElementById(
+        `edit-${prefix}-day-${id}`
+      ).value
+    );
+
+  return isoFromJalali(
+    year,
+    month,
+    day
+  );
+
+}
+
+
+/* =====================================================
+   ذخیره ویرایش پروژه
+   ===================================================== */
+
+async function saveEditProject(id) {
+
+  const project =
+    projects.find(
+      p => p.id === id
+    );
+
+  if(!project) return;
+
+  const nameInput =
+    document.getElementById(
+      `edit-name-${id}`
+    );
+
+  const name =
+    nameInput.value.trim();
+
+  if(!name) {
+
+    alert(
+      'نام شرکت یا پروژه را وارد کنید'
+    );
+
+    return;
+
+  }
+
+  const start =
+    getEditIso(
+      id,
+      'start'
+    );
+
+  const end =
+    getEditIso(
+      id,
+      'end'
+    );
+
+  project.name = name;
+
+  project.start = start;
+
+  project.end = end;
+
+  editingProjectId = null;
+
+  render();
+
+  await saveProjects();
+
+}
+
+
+/* =====================================================
+   تغییر درصد پیشرفت
+   ===================================================== */
+
+async function updateProgress(
+  id,
+  val
+) {
 
   const p =
-    projects.find(x => x.id === id);
+    projects.find(
+      x => x.id === id
+    );
 
-  if (!p) return;
+  if(!p) return;
 
-  p.progress = parseInt(val);
+  p.progress =
+    parseInt(val);
 
   render();
 
   await saveProjects();
+
 }
 
 
-/* ===== افزودن کار ===== */
+/* =====================================================
+   افزودن کار
+   ===================================================== */
 
 async function addSubtask(id) {
 
   const input =
-    document.getElementById('sub-'+id);
+    document.getElementById(
+      'sub-'+id
+    );
 
   const text =
     input.value.trim();
 
-  if (!text) return;
+  if(!text) return;
 
   const project =
-    projects.find(x => x.id === id);
+    projects.find(
+      x => x.id === id
+    );
 
-  if (!project) return;
+  if(!project) return;
 
-  if (!Array.isArray(project.tasks)) {
+  if(
+    !Array.isArray(
+      project.tasks
+    )
+  ) {
+
     project.tasks = [];
+
   }
 
   project.tasks.push({
+
     text,
-    done: false
+
+    done:false
+
   });
 
   render();
 
   await saveProjects();
+
 }
 
 
-/* ===== انجام شدن کار ===== */
+/* =====================================================
+   انجام شدن کار
+   ===================================================== */
 
-async function toggleSubtask(id, idx) {
+async function toggleSubtask(
+  id,
+  idx
+) {
 
   const project =
-    projects.find(x => x.id === id);
+    projects.find(
+      x => x.id === id
+    );
 
-  if (!project || !project.tasks[idx]) {
+  if(
+    !project ||
+    !project.tasks[idx]
+  ) {
+
     return;
+
   }
 
   project.tasks[idx].done =
@@ -573,47 +1633,70 @@ async function toggleSubtask(id, idx) {
   render();
 
   await saveProjects();
+
 }
 
 
-/* ===== حذف کار ===== */
+/* =====================================================
+   حذف کار
+   ===================================================== */
 
-async function deleteSubtask(id, idx) {
+async function deleteSubtask(
+  id,
+  idx
+) {
 
   const project =
-    projects.find(x => x.id === id);
+    projects.find(
+      x => x.id === id
+    );
 
-  if (!project) return;
+  if(!project) return;
 
-  project.tasks.splice(idx, 1);
+  project.tasks.splice(
+    idx,
+    1
+  );
 
   render();
 
   await saveProjects();
+
 }
 
 
-/* ===== یادداشت ===== */
+/* =====================================================
+   یادداشت
+   ===================================================== */
 
-async function updateNote(id, val) {
+async function updateNote(
+  id,
+  val
+) {
 
   const project =
-    projects.find(x => x.id === id);
+    projects.find(
+      x => x.id === id
+    );
 
-  if (!project) return;
+  if(!project) return;
 
   project.note = val;
 
   await saveProjects();
+
 }
 
 
-/* ===== جلوگیری از HTML Injection ===== */
+/* =====================================================
+   جلوگیری از HTML Injection
+   ===================================================== */
 
 function escapeHtml(str) {
 
   return String(str).replace(
     /[&<>"']/g,
+
     m => ({
       '&':'&amp;',
       '<':'&lt;',
@@ -621,87 +1704,127 @@ function escapeHtml(str) {
       '"':'&quot;',
       "'":'&#39;'
     }[m])
+
   );
+
 }
 
 
-/* ===== تب‌ها ===== */
+/* =====================================================
+   تب‌ها
+   ===================================================== */
 
 function setTab(tab) {
 
   currentTab = tab;
 
-  ['pending','done','all'].forEach(t => {
+  [
+    'pending',
+    'done',
+    'all'
+  ].forEach(t => {
 
     document
-      .getElementById('tab-'+t)
+      .getElementById(
+        'tab-'+t
+      )
       .classList.toggle(
         'active',
         t === tab
       );
+
   });
 
   render();
+
 }
 
 
-/* ===== فیلتر ===== */
+/* =====================================================
+   فیلتر
+   ===================================================== */
 
 function getFilteredList() {
 
-  let list = projects.slice();
+  let list =
+    projects.slice();
 
-  if (currentTab === 'pending') {
-
-    list =
-      list.filter(
-        p => Number(p.progress) < 100
-      );
-
-  } else if (currentTab === 'done') {
+  if(
+    currentTab === 'pending'
+  ) {
 
     list =
       list.filter(
-        p => Number(p.progress) >= 100
+        p =>
+          Number(p.progress) < 100
       );
+
+  } else if(
+    currentTab === 'done'
+  ) {
+
+    list =
+      list.filter(
+        p =>
+          Number(p.progress) >= 100
+      );
+
   }
 
   return list;
+
 }
 
 
-/* ===== نمایش پروژه‌ها ===== */
+/* =====================================================
+   نمایش پروژه‌ها
+   ===================================================== */
 
 function render() {
 
   const container =
-    document.getElementById('projList');
+    document.getElementById(
+      'projList'
+    );
 
   const list =
     getFilteredList();
 
-  if (list.length === 0) {
+  if(list.length === 0) {
 
     container.innerHTML =
       '<div class="empty">کاری برای نمایش نیست</div>';
 
     return;
+
   }
 
   container.innerHTML =
     list.map(p => {
 
-      if (!Array.isArray(p.tasks)) {
+      if(
+        !Array.isArray(
+          p.tasks
+        )
+      ) {
+
         p.tasks = [];
+
       }
 
       const doneCount =
-        p.tasks.filter(t => t.done).length;
+        p.tasks.filter(
+          t => t.done
+        ).length;
 
       const isComplete =
         Number(p.progress) >= 100;
 
+      const isEditing =
+        editingProjectId === p.id;
+
       return `
+
       <div class="proj ${isComplete?'complete':''}">
 
         <div class="proj-head">
@@ -710,32 +1833,136 @@ function render() {
             ${escapeHtml(p.name)}
           </span>
 
-          <button
-            class="del-btn"
-            onclick="deleteProject('${p.id}')">
-            ✕
-          </button>
+          <div class="proj-head-actions">
+
+            <button
+              class="edit-btn"
+              title="ویرایش پروژه"
+              onclick="startEditProject('${p.id}')">
+              ✏️
+            </button>
+
+            <button
+              class="del-btn"
+              title="حذف پروژه"
+              onclick="deleteProject('${p.id}')">
+              ✕
+            </button>
+
+          </div>
 
         </div>
 
 
-        <div class="proj-meta">
+        ${
+          isEditing
+          ?
 
-          ${
-            isComplete
-            ? '<span class="badge-done">تکمیل‌شده</span>'
-            : '<span class="badge">در حال انجام</span>'
-          }
+          `
 
-          <span>
-            📅 ${formatJalali(p.start)}
-          </span>
+          <div class="edit-box">
 
-          <span>
-            🏁 ${formatJalali(p.end)}
-          </span>
+            <label>
+              نام شرکت / پروژه
+            </label>
 
-        </div>
+            <input
+              id="edit-name-${p.id}"
+              value="${escapeHtml(p.name)}">
+
+
+            <label>
+              تاریخ شروع (شمسی)
+            </label>
+
+            <div class="edit-date-row">
+
+              <select
+                id="edit-start-year-${p.id}">
+              </select>
+
+              <select
+                id="edit-start-month-${p.id}">
+              </select>
+
+              <select
+                id="edit-start-day-${p.id}">
+              </select>
+
+            </div>
+
+
+            <label>
+              تاریخ اتمام (شمسی)
+            </label>
+
+            <div class="edit-date-row">
+
+              <select
+                id="edit-end-year-${p.id}">
+              </select>
+
+              <select
+                id="edit-end-month-${p.id}">
+              </select>
+
+              <select
+                id="edit-end-day-${p.id}">
+              </select>
+
+            </div>
+
+
+            <div class="edit-actions">
+
+              <button
+                class="save-edit"
+                onclick="saveEditProject('${p.id}')">
+                💾 ذخیره
+              </button>
+
+              <button
+                class="cancel-edit"
+                onclick="cancelEditProject()">
+                لغو
+              </button>
+
+            </div>
+
+          </div>
+
+          `
+
+          :
+
+          `
+
+          <div class="proj-meta">
+
+            ${
+              isComplete
+
+              ?
+
+              '<span class="badge-done">تکمیل‌شده</span>'
+
+              :
+
+              '<span class="badge">در حال انجام</span>'
+            }
+
+            <span>
+              📅 ${formatJalali(p.start)}
+            </span>
+
+            <span>
+              🏁 ${formatJalali(p.end)}
+            </span>
+
+          </div>
+
+          `
+        }
 
 
         <div class="pct-row">
@@ -755,25 +1982,31 @@ function render() {
 
 
         <div class="bar">
+
           <div
             class="fill"
             style="width:${Number(p.progress) || 0}%">
           </div>
+
         </div>
 
 
         <div class="section-title">
+
           ✅ کارهای انجام‌شده
           (${toFaDigits(doneCount)}
           از
           ${toFaDigits(p.tasks.length)})
+
         </div>
 
 
         ${
-          p.tasks.map((t,idx) => `
+          p.tasks.map(
+            (t,idx) => `
 
-            <div class="task ${t.done?'done':''}">
+            <div
+              class="task ${t.done?'done':''}">
 
               <input
                 type="checkbox"
@@ -792,7 +2025,8 @@ function render() {
 
             </div>
 
-          `).join('')
+          `
+          ).join('')
         }
 
 
@@ -827,13 +2061,44 @@ function render() {
         </div>
 
       </div>
+
       `;
 
     }).join('');
+
+
+  /* =================================================
+     فعال کردن تاریخ‌های شمسی قسمت ویرایش
+     ================================================= */
+
+  list.forEach(p => {
+
+    if(
+      editingProjectId === p.id
+    ) {
+
+      setupEditDateSelects(
+        p.id,
+        'start',
+        p.start
+      );
+
+      setupEditDateSelects(
+        p.id,
+        'end',
+        p.end
+      );
+
+    }
+
+  });
+
 }
 
 
-/* ===== گزارش مدیریت ===== */
+/* =====================================================
+   گزارش مدیریت
+   ===================================================== */
 
 function openExport() {
 
@@ -843,90 +2108,143 @@ function openExport() {
 
   projects.forEach(p => {
 
-    out += `📌 ${p.name}\n`;
+    out +=
+      `📌 ${p.name}\n`;
 
     out +=
       `  پیشرفت: ${toFaDigits(p.progress)}٪ | ` +
       `شروع: ${formatJalali(p.start)} | ` +
       `پایان: ${formatJalali(p.end)}\n`;
 
-    if (p.tasks && p.tasks.length) {
+    if(
+      p.tasks &&
+      p.tasks.length
+    ) {
 
       p.tasks.forEach(t => {
 
         out +=
           `  ${t.done?'✅':'⬜'} ${t.text}\n`;
+
       });
+
     }
 
-    if (p.note) {
+    if(p.note) {
 
       out +=
         `  یادداشت: ${p.note}\n`;
+
     }
 
-    out += `\n`;
+    out += '\n';
+
   });
 
-  document.getElementById('exportText').value = out;
+  document.getElementById(
+    'exportText'
+  ).value = out;
 
   document
-    .getElementById('exportModal')
+    .getElementById(
+      'exportModal'
+    )
     .classList.add('open');
+
 }
 
 
+/* =====================================================
+   تاریخ امروز
+   ===================================================== */
+
 function todayIso() {
 
-  const d = new Date();
+  const d =
+    new Date();
 
   return `${d.getFullYear()}-${(d.getMonth()+1)
     .toString()
     .padStart(2,'0')}-${d.getDate()
     .toString()
     .padStart(2,'0')}`;
+
 }
 
+
+/* =====================================================
+   بستن گزارش
+   ===================================================== */
 
 function closeExport() {
 
   document
-    .getElementById('exportModal')
+    .getElementById(
+      'exportModal'
+    )
     .classList.remove('open');
+
 }
 
+
+/* =====================================================
+   کپی گزارش
+   ===================================================== */
 
 function copyExport() {
 
   const ta =
-    document.getElementById('exportText');
+    document.getElementById(
+      'exportText'
+    );
 
   ta.select();
 
-  ta.setSelectionRange(0, 999999);
+  ta.setSelectionRange(
+    0,
+    999999
+  );
 
   try {
 
-    document.execCommand('copy');
+    document.execCommand(
+      'copy'
+    );
 
-    setStatus('گزارش کپی شد');
+    setStatus(
+      'گزارش کپی شد'
+    );
 
-  } catch (e) {
+  } catch(e) {
 
     navigator.clipboard
-      .writeText(ta.value)
-      .then(() => setStatus('گزارش کپی شد'))
-      .catch(() => {});
+      .writeText(
+        ta.value
+      )
+      .then(
+        () =>
+          setStatus(
+            'گزارش کپی شد'
+          )
+      )
+      .catch(
+        () => {}
+      );
+
   }
+
 }
 
 
-/* ===== شروع برنامه ===== */
+/* =====================================================
+   شروع برنامه
+   ===================================================== */
 
 setupDateSelects();
 
 loadProjects();
 
 </script>
+
 </body>
 </html>
