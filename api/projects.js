@@ -1,11 +1,13 @@
 export default async function handler(req, res) {
+
   const REPO = "MrDrumPersia/project-tracker";
   const FILE = "data/projects.json";
+
   const TOKEN = process.env.GH_TOKEN;
 
   if (!TOKEN) {
     return res.status(500).json({
-      error: "GH_TOKEN تنظیم نشده است."
+      error: "توکن GH_TOKEN تنظیم نشده است."
     });
   }
 
@@ -16,236 +18,158 @@ export default async function handler(req, res) {
     "Content-Type": "application/json"
   };
 
-  const githubUrl =
-    `https://api.github.com/repos/${REPO}/contents/${FILE}`;
-
   try {
 
-    /* =========================
-       دریافت فایل فعلی
-       ========================= */
+    const githubUrl =
+      `https://api.github.com/repos/${REPO}/contents/${FILE}`;
 
-    const getResponse = await fetch(githubUrl, {
-      method: "GET",
-      headers,
-      cache: "no-store"
-    });
+    const getFile = await fetch(
+      githubUrl,
+      {
+        headers: headers,
+        cache: "no-store"
+      }
+    );
 
     let projects = [];
     let sha = null;
 
-    if (getResponse.ok) {
+    if (getFile.ok) {
 
-      const fileData = await getResponse.json();
+      const fileData =
+        await getFile.json();
 
       sha = fileData.sha;
 
-      if (fileData.content) {
+      const content =
+        Buffer.from(
+          fileData.content.replace(/\n/g, ""),
+          "base64"
+        ).toString("utf8");
 
-        const cleanContent =
-          fileData.content.replace(/\n/g, "");
+      try {
 
-        const decoded =
-          Buffer.from(
-            cleanContent,
-            "base64"
-          ).toString("utf-8");
+        projects =
+          JSON.parse(content);
 
-        try {
+      } catch (e) {
 
-          projects = JSON.parse(decoded);
+        projects = [];
 
-          if (!Array.isArray(projects)) {
-            projects = [];
-          }
-
-        } catch (e) {
-
-          console.error(
-            "خطا در JSON:",
-            e
-          );
-
-          projects = [];
-        }
       }
 
-    } else if (getResponse.status === 404) {
+    } else if (
+      getFile.status !== 404
+    ) {
 
-      projects = [];
-
-    } else {
-
-      const errorData =
-        await getResponse.json().catch(() => ({}));
+      const error =
+        await getFile.text();
 
       return res.status(
-        getResponse.status
+        getFile.status
       ).json({
         error:
-          errorData.message ||
-          "خطا در دریافت فایل از GitHub"
+          "خطا در دریافت اطلاعات از GitHub: " +
+          error
       });
+
     }
-
-
-    /* =========================
-       GET
-       ========================= */
 
     if (req.method === "GET") {
 
-      return res.status(200).json(projects);
+      return res
+        .status(200)
+        .json(
+          Array.isArray(projects)
+            ? projects
+            : []
+        );
 
     }
 
-
-    /* =========================
-       POST
-       ========================= */
-
     if (req.method === "POST") {
 
-      let newProjects = req.body;
+      const newProjects =
+        req.body;
 
       if (
-        typeof newProjects === "string"
+        !Array.isArray(newProjects)
       ) {
-
-        try {
-          newProjects =
-            JSON.parse(newProjects);
-        } catch (e) {
-
-          return res.status(400).json({
-            error:
-              "اطلاعات ارسالی معتبر نیست."
-          });
-
-        }
-      }
-
-      if (!Array.isArray(newProjects)) {
 
         return res.status(400).json({
           error:
-            "اطلاعات پروژه‌ها باید به صورت آرایه باشد."
+            "اطلاعات پروژه‌ها نامعتبر است."
         });
 
       }
 
-
-      /* =========================
-         تبدیل اطلاعات به JSON
-         ========================= */
-
-      const jsonText =
+      const json =
         JSON.stringify(
           newProjects,
           null,
           2
         );
 
-
-      /* =========================
-         Base64 صحیح
-         ========================= */
-
       const content =
-        Buffer.from(
-          jsonText,
-          "utf-8"
-        ).toString("base64");
-
-
-      /* =========================
-         اطلاعات آپدیت
-         ========================= */
+        Buffer
+          .from(
+            json,
+            "utf8"
+          )
+          .toString("base64");
 
       const body = {
-
         message:
-          "Update projects",
-
-        content
-
+          "Update projects data",
+        content:
+          content
       };
 
       if (sha) {
         body.sha = sha;
       }
 
-
-      /* =========================
-         ذخیره در GitHub
-         ========================= */
-
-      const updateResponse =
+      const updateFile =
         await fetch(
           githubUrl,
           {
             method: "PUT",
-
-            headers,
-
-            body:
-              JSON.stringify(body)
+            headers: headers,
+            body: JSON.stringify(body)
           }
         );
 
-
       const result =
-        await updateResponse
-          .json()
-          .catch(() => ({}));
+        await updateFile.json();
 
+      if (!updateFile.ok) {
 
-      if (!updateResponse.ok) {
-
-        console.error(
-          "GitHub Error:",
-          result
-        );
-
-        return res.status(
-          updateResponse.status
-        ).json({
-          error:
-            result.message ||
-            "GitHub اطلاعات را ذخیره نکرد."
-        });
+        return res
+          .status(updateFile.status)
+          .json({
+            error:
+              result.message ||
+              "خطا در ذخیره‌سازی اطلاعات"
+          });
 
       }
 
-
       return res.status(200).json({
-
         success: true,
-
         message:
-          "پروژه‌ها با موفقیت ذخیره شدند."
-
+          "اطلاعات با موفقیت ذخیره شد."
       });
 
     }
-
-
-    /* =========================
-       متد غیرمجاز
-       ========================= */
 
     return res.status(405).json({
       error:
         "Method Not Allowed"
     });
 
-
   } catch (error) {
 
-    console.error(
-      "API ERROR:",
-      error
-    );
+    console.error(error);
 
     return res.status(500).json({
       error:
