@@ -345,8 +345,9 @@
         "done": false
       },
       {
-        "text": "ارسال بیمه مرداد ماه",
-        "done": false
+        "text": "ارسال بیمه مرداد ماه  دلیل عدم موجودی شرکت معوق هست",
+        "done": false,
+        "editing": false
       }
     ],
     "note": ""
