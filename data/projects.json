@@ -33,11 +33,11 @@
     "name": "کاشی بهجتی",
     "start": "2026-10-24",
     "end": "2026-10-24",
-    "progress": 0,
+    "progress": 100,
     "tasks": [
       {
         "text": "تهیه خروجی 1405 خرید و فروش",
-        "done": false
+        "done": true
       }
     ],
     "note": ""
