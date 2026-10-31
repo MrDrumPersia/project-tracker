@@ -7,8 +7,9 @@
     "progress": 0,
     "tasks": [
       {
-        "text": "انجام امور فراین صنعت",
-        "done": false
+        "text": "انجام امور فراین صنعت1399",
+        "done": false,
+        "editing": false
       }
     ],
     "note": ""
