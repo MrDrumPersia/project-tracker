@@ -77,6 +77,8 @@ export default async function handler(req, res) {
 
     if (req.method === "GET") {
 
+      res.setHeader("X-Data-Sha", sha || "");
+      res.setHeader("Cache-Control", "no-store, max-age=0");
       return res
         .status(200)
         .json(
@@ -88,6 +90,15 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
+
+      // Optional optimistic concurrency check for V3 clients.
+      // Legacy clients that don't supply this header retain their behavior.
+      const expectedSha = req.headers["x-expected-sha"];
+      if (expectedSha && expectedSha !== sha) {
+        return res.status(409).json({
+          error: "نسخه اطلاعات در GitHub تغییر کرده است. قبل از ذخیره دوباره بارگیری کنید."
+        });
+      }
 
       const newProjects =
         req.body;
@@ -156,6 +167,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         success: true,
+        sha: result.content?.sha || null,
         message:
           "اطلاعات با موفقیت ذخیره شد."
       });
